@@ -1,0 +1,111 @@
+import { useState, useEffect } from 'react';
+import Layout from './components/layout/Layout';
+import WashStation from './pages/WashStation';
+import Dashboard from './pages/Dashboard';
+
+function App() {
+  const [currentView, setCurrentView] = useState('wash-station');
+  const [showHeader, setShowHeader] = useState(false);
+
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      // Presionar 'M' o 'ESC' para mostrar/ocultar header
+      if (event.key === 'm' || event.key === 'M' || event.key === 'Escape') {
+        setShowHeader(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
+  // Cuando cambia la vista, decidir si mostrar header por defecto
+  useEffect(() => {
+    if (currentView !== 'wash-station') {
+      setShowHeader(true);
+    } else {
+      setShowHeader(false);
+    }
+  }, [currentView]);
+
+  const renderView = () => {
+    switch(currentView) {
+      case 'wash-station':
+        return <WashStation />;
+      case 'dashboard':
+        return <Dashboard />;
+      case 'reports':
+        return (
+          <div style={{ 
+            padding: '100px 40px', 
+            textAlign: 'center', 
+            color: 'var(--text-secondary)',
+            minHeight: 'calc(100vh - 70px)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <h2 style={{ fontSize: '48px', marginBottom: '16px' }}>📈</h2>
+            <h3 style={{ fontSize: '24px', color: 'var(--text-primary)', marginBottom: '8px' }}>Módulo de Reportes</h3>
+            <p>En desarrollo...</p>
+          </div>
+        );
+      case 'users':
+        return (
+          <div style={{ 
+            padding: '100px 40px', 
+            textAlign: 'center', 
+            color: 'var(--text-secondary)',
+            minHeight: 'calc(100vh - 70px)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <h2 style={{ fontSize: '48px', marginBottom: '16px' }}>👥</h2>
+            <h3 style={{ fontSize: '24px', color: 'var(--text-primary)', marginBottom: '8px' }}>Gestión de Usuarios</h3>
+            <p>En desarrollo...</p>
+          </div>
+        );
+      case 'settings':
+        return (
+          <div style={{ 
+            padding: '100px 40px', 
+            textAlign: 'center', 
+            color: 'var(--text-secondary)',
+            minHeight: 'calc(100vh - 70px)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <h2 style={{ fontSize: '48px', marginBottom: '16px' }}>⚙️</h2>
+            <h3 style={{ fontSize: '24px', color: 'var(--text-primary)', marginBottom: '8px' }}>Configuración</h3>
+            <p>En desarrollo...</p>
+          </div>
+        );
+      default:
+        return <WashStation />;
+    }
+  };
+
+  return (
+    <Layout 
+      currentView={currentView}
+      onViewChange={setCurrentView}
+      forceShowHeader={showHeader}
+    >
+      {renderView()}
+      
+      {/* Indicador de atajo de teclado */}
+      {currentView === 'wash-station' && !showHeader && (
+        <div className="keyboard-hint">
+          Presiona <kbd>M</kbd> o <kbd>ESC</kbd> para mostrar menú
+        </div>
+      )}
+    </Layout>
+  );
+}
+
+export default App;
