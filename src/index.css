@@ -5,36 +5,38 @@
 }
 
 :root {
-  /* Dark Mode Colors - CYSCE Palette (Naranja y Negro) */
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #1a1a1a;
-  --bg-tertiary: #2a2a2a;
-  --bg-card: #1f1f1f;
+  /* SureWash Color Palette */
+  --bg-primary: #f5f7fa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e3f2fd;
+  --bg-card: #ffffff;
   
   /* Text Colors */
-  --text-primary: #ffffff;
-  --text-secondary: #b0b0b0;
-  --text-muted: #808080;
+  --text-primary: #1e3a5f;
+  --text-secondary: #5a6c7d;
+  --text-muted: #8b9cb0;
   
-  /* Accent Colors - Naranja CYSCE */
-  --accent-primary: #ff8c00;
-  --accent-success: #10b981;
-  --accent-warning: #ff8c00;
-  --accent-danger: #ef4444;
+  /* Accent Colors - Teal/Cyan SureWash */
+  --accent-primary: #00bfa5;
+  --accent-primary-dark: #00897b;
+  --accent-primary-light: #26a69a;
+  --accent-success: #4caf50;
+  --accent-warning: #ff9800;
+  --accent-danger: #f44336;
   
   /* Border & Dividers */
-  --border-color: #333333;
-  --divider: #3a3a3a;
+  --border-color: #e0e4e8;
+  --divider: #d1d9e0;
   
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
   
-  /* Orange variations */
-  --orange-light: #ffa500;
-  --orange-dark: #cc7000;
-  --orange-glow: rgba(255, 140, 0, 0.4);
+  /* Teal variations */
+  --teal-light: #b2dfdb;
+  --teal-dark: #00695c;
+  --teal-glow: rgba(0, 191, 165, 0.2);
 }
 
 body {
@@ -58,16 +60,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-tertiary);
+  background: var(--accent-primary);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-primary);
+  background: var(--accent-primary-dark);
 }
 
 /* Keyboard Hint */
@@ -110,5 +112,5 @@ body {
   font-size: 13px;
   font-weight: 600;
   color: var(--accent-primary);
-  box-shadow: 0 2px 0 var(--orange-dark);
+  box-shadow: 0 2px 0 var(--accent-primary-dark);
 }

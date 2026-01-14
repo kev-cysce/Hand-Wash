@@ -5,6 +5,7 @@
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
+  background-color: var(--bg-primary);
 }
 
 /* Video en esquina superior derecha */
@@ -19,16 +20,16 @@
   width: 240px;
   height: 135px;
   background-color: var(--bg-secondary);
-  border: 2px solid var(--border-color);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .video-mini-content {
   width: 100%;
   height: calc(100% - 24px);
-  background-color: var(--bg-primary);
+  background-color: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -36,7 +37,8 @@
 
 .video-mini-icon {
   font-size: 32px;
-  opacity: 0.5;
+  opacity: 0.3;
+  color: var(--bg-secondary);
 }
 
 .video-mini-info {
@@ -51,7 +53,7 @@
 
 .video-time {
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-family: monospace;
 }
 
@@ -70,10 +72,10 @@
 }
 
 .main-subtitle {
-  font-size: 16px;
+  font-size: 18px;
   color: var(--accent-primary);
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
@@ -86,8 +88,9 @@
   max-width: 1000px;
   padding: 40px;
   background-color: var(--bg-secondary);
-  border: 2px solid var(--border-color);
-  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
 }
 
 .step-circle-wrapper {
@@ -136,21 +139,21 @@
   stroke-width: 10;
   stroke-linecap: round;
   transition: all 0.5s ease;
-  filter: drop-shadow(0 0 10px var(--orange-glow));
+  filter: drop-shadow(0 0 8px var(--teal-glow));
 }
 
 .progress-ring-fill.completed-ring {
   stroke: var(--accent-success);
-  filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.8));
+  filter: drop-shadow(0 0 10px rgba(76, 175, 80, 0.4));
   animation: glowPulse 2s ease-in-out infinite;
 }
 
 @keyframes glowPulse {
   0%, 100% {
-    filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.8));
+    filter: drop-shadow(0 0 10px rgba(76, 175, 80, 0.4));
   }
   50% {
-    filter: drop-shadow(0 0 20px rgba(16, 185, 129, 1));
+    filter: drop-shadow(0 0 16px rgba(76, 175, 80, 0.6));
   }
 }
 
@@ -169,7 +172,7 @@
 
 .step-icon {
   font-size: 48px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .step-progress {
