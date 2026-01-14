@@ -1,19 +1,101 @@
+import { useState, useMemo } from 'react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  // Datos para gráfico de líneas - Cumplimiento por hora
-  const complianceData = [
-    { hora: '00:00', cumplimiento: 85, promedio: 88 },
-    { hora: '04:00', cumplimiento: 78, promedio: 88 },
-    { hora: '08:00', cumplimiento: 92, promedio: 88 },
-    { hora: '12:00', cumplimiento: 96, promedio: 88 },
-    { hora: '16:00', cumplimiento: 94, promedio: 88 },
-    { hora: '20:00', cumplimiento: 88, promedio: 88 },
-    { hora: '23:59', cumplimiento: 82, promedio: 88 }
-  ];
+  // Estados para filtros
+  const [dateRange, setDateRange] = useState('7'); // 7, 30, 90 días
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // Datos para gráfico de barras - Lavados por área
+  // Generar datos para 90 días (3 meses)
+  const generateDailyData = () => {
+    const data = [];
+    const today = new Date();
+    
+    for (let i = 89; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      
+      const baseWashes = 180 + Math.random() * 80;
+      const compliance = 85 + Math.random() * 12;
+      
+      data.push({
+        fecha: date.toISOString().split('T')[0],
+        fechaLabel: date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }),
+        lavados: Math.round(baseWashes),
+        correctos: Math.round(baseWashes * (compliance / 100)),
+        cumplimiento: Math.round(compliance),
+        promedio: 88
+      });
+    }
+    return data;
+  };
+
+  const allData = useMemo(() => generateDailyData(), []);
+
+  // Filtrar datos según el rango seleccionado
+  const filteredData = useMemo(() => {
+    if (startDate && endDate) {
+      return allData.filter(item => {
+        return item.fecha >= startDate && item.fecha <= endDate;
+      });
+    }
+    
+    const numDays = parseInt(dateRange);
+    return allData.slice(-numDays);
+  }, [dateRange, startDate, endDate, allData]);
+
+  // Calcular estadísticas del período filtrado
+  const stats = useMemo(() => {
+    const totalWashes = filteredData.reduce((sum, day) => sum + day.lavados, 0);
+    const totalCorrect = filteredData.reduce((sum, day) => sum + day.correctos, 0);
+    const avgTime = 28;
+    const successRate = totalWashes > 0 ? ((totalCorrect / totalWashes) * 100).toFixed(1) : 0;
+
+    // Calcular cambio respecto al período anterior
+    const previousPeriodData = allData.slice(-dateRange * 2, -dateRange);
+    const prevTotal = previousPeriodData.reduce((sum, day) => sum + day.lavados, 0);
+    const change = prevTotal > 0 ? (((totalWashes - prevTotal) / prevTotal) * 100).toFixed(1) : 0;
+
+    return [
+      { 
+        label: 'Lavados Totales', 
+        value: totalWashes.toString(), 
+        change: `${change > 0 ? '+' : ''}${change}%`, 
+        trend: change >= 0 ? 'up' : 'down',
+        icon: '🖐️',
+        color: '#00bfa5'
+      },
+      { 
+        label: 'Lavados Correctos', 
+        value: totalCorrect.toString(), 
+        change: '+8%', 
+        trend: 'up',
+        icon: '✓',
+        color: '#4caf50'
+      },
+      { 
+        label: 'Tiempo Promedio', 
+        value: `${avgTime}s`, 
+        change: '-2s', 
+        trend: 'up',
+        icon: '⏱️',
+        color: '#00bfa5'
+      },
+      { 
+        label: 'Tasa de Éxito', 
+        value: `${successRate}%`, 
+        change: '+2.1%', 
+        trend: 'up',
+        icon: '📊',
+        color: '#4caf50'
+      }
+    ];
+  }, [filteredData, allData, dateRange]);
+
+  // Datos para gráfico de barras - Por área
   const areaData = [
     { area: 'UCI', lavados: 89, correctos: 85 },
     { area: 'Urgencias', lavados: 67, correctos: 62 },
@@ -22,58 +104,12 @@ const Dashboard = () => {
     { area: 'Internación', lavados: 38, correctos: 35 }
   ];
 
-  // Datos para gráfico circular - Distribución de cumplimiento
+  // Datos para gráfico circular
   const pieData = [
     { name: 'Excelente (95-100%)', value: 156, color: '#4caf50' },
     { name: 'Bueno (85-94%)', value: 75, color: '#00bfa5' },
     { name: 'Regular (70-84%)', value: 12, color: '#ff9800' },
     { name: 'Deficiente (<70%)', value: 4, color: '#ef4444' }
-  ];
-
-  // Datos para área chart - Tendencia semanal
-  const weeklyData = [
-    { dia: 'Lun', lavados: 198, correctos: 185 },
-    { dia: 'Mar', lavados: 215, correctos: 201 },
-    { dia: 'Mié', lavados: 234, correctos: 219 },
-    { dia: 'Jue', lavados: 228, correctos: 215 },
-    { dia: 'Vie', lavados: 247, correctos: 231 },
-    { dia: 'Sáb', lavados: 187, correctos: 175 },
-    { dia: 'Dom', lavados: 156, correctos: 148 }
-  ];
-
-  const stats = [
-    { 
-      label: 'Lavados Hoy', 
-      value: '247', 
-      change: '+12%', 
-      trend: 'up',
-      icon: '🖐️',
-      color: '#00bfa5'
-    },
-    { 
-      label: 'Lavados Correctos', 
-      value: '231', 
-      change: '+8%', 
-      trend: 'up',
-      icon: '✓',
-      color: '#4caf50'
-    },
-    { 
-      label: 'Tiempo Promedio', 
-      value: '28s', 
-      change: '-2s', 
-      trend: 'up',
-      icon: '⏱️',
-      color: '#00bfa5'
-    },
-    { 
-      label: 'Tasa de Éxito', 
-      value: '93.5%', 
-      change: '+2.1%', 
-      trend: 'up',
-      icon: '📊',
-      color: '#4caf50'
-    }
   ];
 
   const qualityMetrics = [
@@ -93,6 +129,19 @@ const Dashboard = () => {
     { id: '#L-1843', area: 'UCI', compliance: 96, time: '27s', timestamp: '10:30', status: 'success' }
   ];
 
+  const handleDateRangeChange = (days) => {
+    setDateRange(days);
+    setStartDate('');
+    setEndDate('');
+    setShowDatePicker(false);
+  };
+
+  const handleCustomDateFilter = () => {
+    if (startDate && endDate) {
+      setShowDatePicker(false);
+    }
+  };
+
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -101,10 +150,49 @@ const Dashboard = () => {
           <p className="dashboard-subtitle">Análisis de cumplimiento y métricas de calidad</p>
         </div>
         <div className="dashboard-actions">
-          <button className="action-btn secondary">
-            <span>📅</span>
-            <span>Filtrar por fecha</span>
-          </button>
+          <div className="date-filter-container">
+            <button 
+              className="action-btn secondary"
+              onClick={() => setShowDatePicker(!showDatePicker)}
+            >
+              <span>📅</span>
+              <span>Filtrar por fecha</span>
+            </button>
+            
+            {showDatePicker && (
+              <div className="date-picker-dropdown">
+                <div className="date-inputs">
+                  <div className="date-input-group">
+                    <label>Desde:</label>
+                    <input 
+                      type="date" 
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      max={endDate || new Date().toISOString().split('T')[0]}
+                    />
+                  </div>
+                  <div className="date-input-group">
+                    <label>Hasta:</label>
+                    <input 
+                      type="date" 
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      min={startDate}
+                      max={new Date().toISOString().split('T')[0]}
+                    />
+                  </div>
+                </div>
+                <button 
+                  className="apply-filter-btn"
+                  onClick={handleCustomDateFilter}
+                  disabled={!startDate || !endDate}
+                >
+                  Aplicar Filtro
+                </button>
+              </div>
+            )}
+          </div>
+          
           <button className="action-btn primary">
             <span>📊</span>
             <span>Exportar PDF</span>
@@ -129,22 +217,41 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Gráfico de Líneas - Cumplimiento por Hora */}
+      {/* Gráfico de Líneas - Cumplimiento */}
       <div className="chart-section-full">
         <div className="section-card">
           <div className="section-header">
-            <h3 className="section-title">Tasa de Cumplimiento - Tendencia por Hora</h3>
+            <h3 className="section-title">Tasa de Cumplimiento - Tendencia</h3>
             <div className="chart-controls">
-              <button className="chart-btn active">Hoy</button>
-              <button className="chart-btn">7 días</button>
-              <button className="chart-btn">30 días</button>
+              <button 
+                className={`chart-btn ${dateRange === '7' ? 'active' : ''}`}
+                onClick={() => handleDateRangeChange('7')}
+              >
+                7 días
+              </button>
+              <button 
+                className={`chart-btn ${dateRange === '30' ? 'active' : ''}`}
+                onClick={() => handleDateRangeChange('30')}
+              >
+                30 días
+              </button>
+              <button 
+                className={`chart-btn ${dateRange === '90' ? 'active' : ''}`}
+                onClick={() => handleDateRangeChange('90')}
+              >
+                90 días
+              </button>
             </div>
           </div>
           <div className="chart-area">
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={complianceData}>
+              <LineChart data={filteredData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e0e4e8" />
-                <XAxis dataKey="hora" stroke="#5a6c7d" />
+                <XAxis 
+                  dataKey="fechaLabel" 
+                  stroke="#5a6c7d"
+                  interval={Math.floor(filteredData.length / 10)}
+                />
                 <YAxis stroke="#5a6c7d" />
                 <Tooltip 
                   contentStyle={{ 
@@ -160,7 +267,7 @@ const Dashboard = () => {
                   stroke="#00bfa5" 
                   strokeWidth={3}
                   name="Cumplimiento (%)"
-                  dot={{ fill: '#00bfa5', r: 5 }}
+                  dot={{ fill: '#00bfa5', r: 3 }}
                 />
                 <Line 
                   type="monotone" 
@@ -268,7 +375,6 @@ const Dashboard = () => {
 
       {/* Dos gráficos en fila */}
       <div className="charts-row">
-        {/* Gráfico de Barras - Por Área */}
         <div className="section-card">
           <div className="section-header">
             <h3 className="section-title">Lavados por Área</h3>
@@ -294,7 +400,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Gráfico Circular - Distribución */}
         <div className="section-card">
           <div className="section-header">
             <h3 className="section-title">Distribución de Cumplimiento</h3>
@@ -324,17 +429,21 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Gráfico de Área - Tendencia Semanal */}
+      {/* Gráfico de Área - Tendencia */}
       <div className="chart-section-full">
         <div className="section-card">
           <div className="section-header">
-            <h3 className="section-title">Tendencia Semanal</h3>
+            <h3 className="section-title">Tendencia de Lavados - Período Seleccionado</h3>
           </div>
           <div className="chart-area">
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={weeklyData}>
+              <AreaChart data={filteredData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e0e4e8" />
-                <XAxis dataKey="dia" stroke="#5a6c7d" />
+                <XAxis 
+                  dataKey="fechaLabel" 
+                  stroke="#5a6c7d"
+                  interval={Math.floor(filteredData.length / 10)}
+                />
                 <YAxis stroke="#5a6c7d" />
                 <Tooltip 
                   contentStyle={{ 

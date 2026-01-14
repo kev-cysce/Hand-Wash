@@ -65,6 +65,82 @@
   background-color: var(--accent-primary-dark);
 }
 
+/* Date Filter */
+.date-filter-container {
+  position: relative;
+}
+
+.date-picker-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  min-width: 320px;
+}
+
+.date-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-input-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.date-input-group input[type="date"] {
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  transition: all 0.2s ease;
+}
+
+.date-input-group input[type="date"]:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--teal-glow);
+}
+
+.apply-filter-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apply-filter-btn:hover:not(:disabled) {
+  background-color: var(--accent-primary-dark);
+}
+
+.apply-filter-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Stats Grid */
 .stats-grid {
   display: grid;
@@ -108,6 +184,11 @@
   border-radius: 12px;
   background-color: rgba(76, 175, 80, 0.1);
   color: var(--accent-success);
+}
+
+.stat-trend.down {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: var(--accent-danger);
 }
 
 .stat-body {
@@ -469,11 +550,17 @@
 
   .dashboard-actions {
     width: 100%;
+    flex-direction: column;
   }
 
   .action-btn {
-    flex: 1;
+    width: 100%;
     justify-content: center;
+  }
+
+  .date-picker-dropdown {
+    right: auto;
+    left: 0;
   }
 
   .stats-grid {

@@ -28,7 +28,7 @@ const WashStation = () => {
       {/* Layout de 6 círculos - Minimalista */}
       <div className="circular-layout">
         <div className="title-section">
-          <p className="main-subtitle">Técnica WHO - 6 Pasos</p>
+          <p className="main-subtitle">Supervisión de Lavado - 6 Pasos</p>
         </div>
 
         <div className="steps-grid">
