@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  background-color: var(--bg-primary);
+  background-color: #ffffff;
 }
 
 /* Logo en esquina superior izquierda */
@@ -20,7 +20,6 @@
   height: 135px;
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
 }
 
 /* Video en esquina superior derecha */
@@ -44,7 +43,7 @@
 .video-mini-content {
   width: 100%;
   height: calc(100% - 24px);
-  background-color: var(--text-primary);
+  background-color: #2c3e50;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -52,8 +51,8 @@
 
 .video-mini-icon {
   font-size: 32px;
-  opacity: 0.3;
-  color: var(--bg-secondary);
+  opacity: 0.5;
+  color: #ffffff;
 }
 
 .video-mini-info {
@@ -102,7 +101,7 @@
   width: 100%;
   max-width: 1000px;
   padding: 40px;
-  background-color: var(--bg-secondary);
+  background-color: #ffffff;
   border: 1px solid var(--border-color);
   border-radius: 16px;
   box-shadow: var(--shadow-md);
@@ -144,7 +143,7 @@
 
 .progress-ring-bg {
   fill: none;
-  stroke: var(--bg-tertiary);
+  stroke: #f0f0f0;
   stroke-width: 10;
 }
 
@@ -153,7 +152,7 @@
   stroke: var(--accent-primary);
   stroke-width: 10;
   stroke-linecap: round;
-  transition: all 0.5s ease;
+  transition: stroke-dashoffset 0.3s ease-out;
   filter: drop-shadow(0 0 8px var(--teal-glow));
 }
 
