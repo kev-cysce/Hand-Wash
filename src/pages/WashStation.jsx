@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import './WashStation.css';
 
 const WashStation = () => {
-  const targetProgress = [100, 100, 65, 20, 10, 0];
+  // Objetivos finales: solo pasos 1 y 3 completos, resto entre 30-40%
+  const targetProgress = [100, 35, 100, 32, 38, 34];
   const [currentProgress, setCurrentProgress] = useState([0, 0, 0, 0, 0, 0]);
 
   const washSteps = [
@@ -15,26 +16,40 @@ const WashStation = () => {
   ];
 
   useEffect(() => {
-    // Animar cada círculo progresivamente
+    const duration = 120000; // 2 minutos en milisegundos
+    const updateInterval = 100; // Actualizar cada 100ms
+    const totalUpdates = duration / updateInterval;
+
     const intervals = targetProgress.map((target, index) => {
       let current = 0;
-      const startDelay = index * 300;
+      let updateCount = 0;
+      const startDelay = Math.random() * 2000; // Delay aleatorio de inicio
       
       const timeout = setTimeout(() => {
         const interval = setInterval(() => {
-          current += 2;
+          updateCount++;
           
-          if (current >= target) {
+          // Progreso con variación aleatoria para simular movimiento natural
+          const progressPerUpdate = target / totalUpdates;
+          const randomVariation = (Math.random() - 0.5) * 2; // ±1% de variación
+          
+          current += progressPerUpdate + randomVariation;
+          
+          // Limitar al objetivo
+          if (current >= target || updateCount >= totalUpdates) {
             current = target;
             clearInterval(interval);
           }
           
+          // No permitir valores negativos
+          current = Math.max(0, current);
+          
           setCurrentProgress(prev => {
             const newProgress = [...prev];
-            newProgress[index] = current;
+            newProgress[index] = Math.round(current);
             return newProgress;
           });
-        }, 20);
+        }, updateInterval);
         
         return interval;
       }, startDelay);
@@ -49,12 +64,12 @@ const WashStation = () => {
 
   return (
     <div className="wash-station-new">
-      {/* Logo en esquina superior izquierda */}
+      {/* Logo en esquina superior izquierda - 40% más pequeño */}
       <div className="logo-corner">
         <img src={`${import.meta.env.BASE_URL}images/Logo.jpeg`} alt="CYSCE Logo" className="logo-image" />
       </div>
 
-      {/* Video en esquina superior derecha */}
+      {/* Video en esquina superior derecha - 25% más grande */}
       <div className="video-corner">
         <div className="video-mini">
           <video 
