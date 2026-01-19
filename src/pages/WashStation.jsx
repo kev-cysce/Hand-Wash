@@ -17,23 +17,27 @@ const WashStation = () => {
 
   useEffect(() => {
     const duration = 120000; // 2 minutos en milisegundos
-    const updateInterval = 100; // Actualizar cada 100ms
+    const updateInterval = 150; // Actualizar cada 150ms
     const totalUpdates = duration / updateInterval;
 
     const intervals = targetProgress.map((target, index) => {
       let current = 0;
       let updateCount = 0;
-      const startDelay = Math.random() * 2000; // Delay aleatorio de inicio
+      const startDelay = Math.random() * 3000; // Delay aleatorio de inicio (0-3 segundos)
       
       const timeout = setTimeout(() => {
         const interval = setInterval(() => {
           updateCount++;
           
-          // Progreso con variación aleatoria para simular movimiento natural
-          const progressPerUpdate = target / totalUpdates;
-          const randomVariation = (Math.random() - 0.5) * 2; // ±1% de variación
+          // Incremento base por actualización
+          const baseIncrement = target / totalUpdates;
           
-          current += progressPerUpdate + randomVariation;
+          // Variación aleatoria del incremento (entre 0.5x y 1.5x el incremento base)
+          // Esto hace que a veces avance más rápido, a veces más lento, pero SIEMPRE avanza
+          const randomMultiplier = 0.5 + Math.random(); // Entre 0.5 y 1.5
+          const increment = baseIncrement * randomMultiplier;
+          
+          current += increment;
           
           // Limitar al objetivo
           if (current >= target || updateCount >= totalUpdates) {
@@ -41,12 +45,9 @@ const WashStation = () => {
             clearInterval(interval);
           }
           
-          // No permitir valores negativos
-          current = Math.max(0, current);
-          
           setCurrentProgress(prev => {
             const newProgress = [...prev];
-            newProgress[index] = Math.round(current);
+            newProgress[index] = Math.min(Math.round(current), target);
             return newProgress;
           });
         }, updateInterval);
