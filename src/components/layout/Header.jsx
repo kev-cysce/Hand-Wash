@@ -13,11 +13,7 @@ const Header = ({ currentView, onViewChange, className }) => {
     <header className={`top-header ${className}`}>
       <div className="header-content">
         <div className="logo-section">
-          <span className="logo-icon">🧼</span>
-          <div className="logo-text-wrapper">
-            <span className="logo-text">Hand-Wash</span>
-            <span className="logo-subtitle">CYSCE</span>
-          </div>
+          <img src="/Hand-Wash/images/Logo.jpeg" alt="CYSCE" className="header-logo" />
         </div>
 
         <nav className="top-nav">
