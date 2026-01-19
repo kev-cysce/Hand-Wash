@@ -97,13 +97,6 @@ function App() {
       forceShowHeader={showHeader}
     >
       {renderView()}
-      
-      {/* Indicador de atajo de teclado */}
-      {currentView === 'wash-station' && !showHeader && (
-        <div className="keyboard-hint">
-          Presiona <kbd>M</kbd> o <kbd>ESC</kbd> para mostrar menú
-        </div>
-      )}
     </Layout>
   );
 }
