@@ -6,23 +6,23 @@ const WashStation = () => {
   const [currentProgress, setCurrentProgress] = useState([0, 0, 0, 0, 0, 0]);
 
   const washSteps = [
-    { id: 1, name: 'Palma con palma', progress: currentProgress[0], image: '/Hand-Wash/images/pasos/Paso 1.png' },
-    { id: 2, name: 'Palma sobre dorsos', progress: currentProgress[1], image: '/Hand-Wash/images/pasos/Paso 2.png' },
-    { id: 3, name: 'Palma entrelazados', progress: currentProgress[2], image: '/Hand-Wash/images/pasos/Paso 3.png' },
-    { id: 4, name: 'Manos a dedos', progress: currentProgress[3], image: '/Hand-Wash/images/pasos/Paso 4.png' },
-    { id: 5, name: 'Rotación pulgar', progress: currentProgress[4], image: '/Hand-Wash/images/pasos/Paso 5.png' },
-    { id: 6, name: 'Yemas con palma', progress: currentProgress[5], image: '/Hand-Wash/images/pasos/Paso 6.png' }
+    { id: 1, name: 'Palma con palma', progress: currentProgress[0], image: `${import.meta.env.BASE_URL}images/pasos/Paso 1.png` },
+    { id: 2, name: 'Palma sobre dorsos', progress: currentProgress[1], image: `${import.meta.env.BASE_URL}images/pasos/Paso 2.png` },
+    { id: 3, name: 'Palma entrelazados', progress: currentProgress[2], image: `${import.meta.env.BASE_URL}images/pasos/Paso 3.png` },
+    { id: 4, name: 'Manos a dedos', progress: currentProgress[3], image: `${import.meta.env.BASE_URL}images/pasos/Paso 4.png` },
+    { id: 5, name: 'Rotación pulgar', progress: currentProgress[4], image: `${import.meta.env.BASE_URL}images/pasos/Paso 5.png` },
+    { id: 6, name: 'Yemas con palma', progress: currentProgress[5], image: `${import.meta.env.BASE_URL}images/pasos/Paso 6.png` }
   ];
 
   useEffect(() => {
     // Animar cada círculo progresivamente
     const intervals = targetProgress.map((target, index) => {
       let current = 0;
-      const startDelay = index * 300; // Delay escalonado para cada círculo
+      const startDelay = index * 300;
       
       const timeout = setTimeout(() => {
         const interval = setInterval(() => {
-          current += 2; // Incremento de 2% cada frame
+          current += 2;
           
           if (current >= target) {
             current = target;
@@ -34,7 +34,7 @@ const WashStation = () => {
             newProgress[index] = current;
             return newProgress;
           });
-        }, 20); // Actualizar cada 20ms para animación suave
+        }, 20);
         
         return interval;
       }, startDelay);
@@ -42,7 +42,6 @@ const WashStation = () => {
       return timeout;
     });
 
-    // Cleanup
     return () => {
       intervals.forEach(interval => clearTimeout(interval));
     };
@@ -52,18 +51,22 @@ const WashStation = () => {
     <div className="wash-station-new">
       {/* Logo en esquina superior izquierda */}
       <div className="logo-corner">
-        <img src="/Hand-Wash/images/Logo.jpeg" alt="CYSCE Logo" className="logo-image" />
+        <img src={`${import.meta.env.BASE_URL}images/Logo.jpeg`} alt="CYSCE Logo" className="logo-image" />
       </div>
 
-      {/* Video pequeño en esquina superior derecha */}
+      {/* Video en esquina superior derecha */}
       <div className="video-corner">
         <div className="video-mini">
-          <div className="video-mini-content">
-            <span className="video-mini-icon">📹</span>
-          </div>
-          <div className="video-mini-info">
-            <span className="video-time">0:21 / 3:18</span>
-          </div>
+          <video 
+            className="video-player"
+            autoPlay 
+            loop 
+            muted
+            playsInline
+          >
+            <source src={`${import.meta.env.BASE_URL}videos/Video Lavado de manos.mp4`} type="video/mp4" />
+            Tu navegador no soporta el elemento de video.
+          </video>
         </div>
       </div>
 
