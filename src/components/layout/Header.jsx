@@ -4,7 +4,7 @@ const Header = ({ currentView, onViewChange, className }) => {
   const menuItems = [
     { id: 'wash-station', icon: '🖐️', label: 'Estación de Lavado' },
     { id: 'dashboard', icon: '📊', label: 'Dashboard' },
-    { id: 'step-metrics', icon: '📋', label: 'Métricas por Paso' },
+    { id: 'step-metrics', icon: '📋', label: 'Métricas' },
     { id: 'reports', icon: '📈', label: 'Reportes' },
     { id: 'users', icon: '👥', label: 'Usuarios' },
     { id: 'settings', icon: '⚙️', label: 'Configuración' }
