@@ -4,12 +4,15 @@ import 'jspdf-autotable';
 import './Reports.css';
 
 // Generar datos simulados por unidad
-const generateUnitData = (unitName, days = 30) => {
+const generateUnitData = (unitName, startDate, endDate) => {
   const data = [];
-  const today = new Date();
+  const start = startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 30));
+  const end = endDate ? new Date(endDate) : new Date();
   
-  for (let i = days - 1; i >= 0; i--) {
-    const date = new Date(today);
+  const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+  
+  for (let i = days; i >= 0; i--) {
+    const date = new Date(end);
     date.setDate(date.getDate() - i);
     
     const lavados = Math.floor(Math.random() * 80) + 180;
@@ -51,17 +54,17 @@ const Reports = () => {
 
   // Generar datos según filtros
   const reportData = useMemo(() => {
-    const units = selectedUnit === 'all' 
+    const unitsToInclude = selectedUnit === 'all' 
       ? ['UCI', 'Urgencias', 'Quirófano', 'Pediatría', 'Internación']
-      : [selectedUnit.toUpperCase()];
+      : [units.find(u => u.id === selectedUnit)?.name];
     
-    const allData = units.map(unit => ({
+    const allData = unitsToInclude.map(unit => ({
       unit,
-      data: generateUnitData(unit, 30)
+      data: generateUnitData(unit, startDate, endDate)
     }));
     
     return allData;
-  }, [selectedUnit]);
+  }, [selectedUnit, startDate, endDate]);
 
   // Calcular estadísticas totales
   const stats = useMemo(() => {
@@ -83,7 +86,20 @@ const Reports = () => {
     };
   }, [reportData]);
 
-  // Generar PDF
+  // Generar datos por paso (para reporte de pasos)
+  const generateStepData = () => {
+    const steps = [
+      { id: 1, name: 'Palma con palma', cumplimiento: 95.2 },
+      { id: 2, name: 'Palma sobre dorsos', cumplimiento: 72.4 },
+      { id: 3, name: 'Palma entrelazados', cumplimiento: 88.1 },
+      { id: 4, name: 'Manos a dedos', cumplimiento: 65.3 },
+      { id: 5, name: 'Rotación pulgar', cumplimiento: 70.8 },
+      { id: 6, name: 'Yemas con palma', cumplimiento: 68.5 }
+    ];
+    return steps;
+  };
+
+  // Generar PDF y abrirlo en nueva ventana
   const generatePDF = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.width;
@@ -117,15 +133,15 @@ const Reports = () => {
     });
     doc.text(`Fecha de generación: ${today}`, 15, 50);
     doc.text(`Unidad: ${units.find(u => u.id === selectedUnit)?.name}`, 15, 56);
-    doc.text(`Período: ${startDate || 'Últimos 30 días'} - ${endDate || 'Hoy'}`, 15, 62);
+    
+    const periodStart = startDate || new Date(new Date().setDate(new Date().getDate() - 30)).toLocaleDateString('es-ES');
+    const periodEnd = endDate || new Date().toLocaleDateString('es-ES');
+    doc.text(`Período: ${periodStart} - ${periodEnd}`, 15, 62);
     
     // Resumen ejecutivo
     doc.setFontSize(14);
     doc.setTextColor(30, 58, 95);
     doc.text('Resumen Ejecutivo', 15, 75);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(90, 108, 125);
     
     const summaryData = [
       ['Métrica', 'Valor'],
@@ -156,12 +172,90 @@ const Reports = () => {
       }
     });
     
-    // Datos por unidad
     let currentY = doc.lastAutoTable.finalY + 15;
+
+    // Agregar contenido específico según tipo de reporte
+    if (reportType === 'steps') {
+      // Reporte por pasos
+      doc.setFontSize(14);
+      doc.setTextColor(30, 58, 95);
+      doc.text('Análisis por Paso', 15, currentY);
+      
+      currentY += 7;
+      
+      const stepData = generateStepData();
+      const stepTableData = [
+        ['Paso', 'Técnica', 'Cumplimiento'],
+        ...stepData.map(step => [
+          step.id.toString(),
+          step.name,
+          `${step.cumplimiento}%`
+        ])
+      ];
+      
+      doc.autoTable({
+        startY: currentY,
+        head: [stepTableData[0]],
+        body: stepTableData.slice(1),
+        theme: 'striped',
+        headStyles: {
+          fillColor: [0, 191, 165],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
+        },
+        styles: {
+          fontSize: 10,
+          cellPadding: 5
+        }
+      });
+      
+      currentY = doc.lastAutoTable.finalY + 10;
+    }
+    
+    if (reportType === 'comparative' && selectedUnit === 'all') {
+      // Reporte comparativo
+      doc.setFontSize(14);
+      doc.setTextColor(30, 58, 95);
+      doc.text('Comparación entre Unidades', 15, currentY);
+      
+      currentY += 7;
+      
+      const compData = [
+        ['Unidad', 'Total Lavados', 'Correctos', 'Tasa de Éxito'],
+        ...reportData.map(({ unit, data }) => {
+          const total = data.reduce((sum, day) => sum + day.lavados, 0);
+          const correctos = data.reduce((sum, day) => sum + day.correctos, 0);
+          const tasa = ((correctos / total) * 100).toFixed(1);
+          return [unit, total.toString(), correctos.toString(), `${tasa}%`];
+        })
+      ];
+      
+      doc.autoTable({
+        startY: currentY,
+        head: [compData[0]],
+        body: compData.slice(1),
+        theme: 'striped',
+        headStyles: {
+          fillColor: [0, 191, 165],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
+        },
+        styles: {
+          fontSize: 10,
+          cellPadding: 5
+        }
+      });
+      
+      currentY = doc.lastAutoTable.finalY + 10;
+    }
+    
+    // Datos detallados por unidad
+    doc.addPage();
+    currentY = 20;
     
     doc.setFontSize(14);
     doc.setTextColor(30, 58, 95);
-    doc.text('Datos por Unidad', 15, currentY);
+    doc.text('Datos Detallados por Unidad', 15, currentY);
     
     currentY += 7;
     
@@ -170,9 +264,12 @@ const Reports = () => {
       const unitCorrectos = data.reduce((sum, day) => sum + day.correctos, 0);
       const unitTasa = ((unitCorrectos / unitTotal) * 100).toFixed(1);
       
+      // Mostrar últimos 10 días
+      const recentData = data.slice(-10);
+      
       const unitData = [
         ['Fecha', 'Lavados', 'Correctos', 'Cumplimiento'],
-        ...data.slice(-7).map(day => [
+        ...recentData.map(day => [
           day.fechaLabel,
           day.lavados.toString(),
           day.correctos.toString(),
@@ -180,6 +277,11 @@ const Reports = () => {
         ]),
         ['TOTAL', unitTotal.toString(), unitCorrectos.toString(), `${unitTasa}%`]
       ];
+      
+      doc.setFontSize(12);
+      doc.setTextColor(0, 191, 165);
+      doc.text(`Unidad: ${unit}`, 15, currentY);
+      currentY += 5;
       
       doc.autoTable({
         startY: currentY,
@@ -207,11 +309,10 @@ const Reports = () => {
           1: { halign: 'right', cellWidth: 30 },
           2: { halign: 'right', cellWidth: 30 },
           3: { halign: 'right', cellWidth: 35 }
-        },
-        margin: { top: 10 }
+        }
       });
       
-      currentY = doc.lastAutoTable.finalY + 10;
+      currentY = doc.lastAutoTable.finalY + 15;
       
       // Nueva página si es necesario
       if (currentY > 250) {
@@ -220,7 +321,7 @@ const Reports = () => {
       }
     });
     
-    // Footer
+    // Footer en todas las páginas
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -233,16 +334,17 @@ const Reports = () => {
         { align: 'center' }
       );
       doc.text(
-        'Hand-Wash © 2026 CYSCE',
+        'Hand-Wash © 2026 CYSCE - Hospital HDS',
         pageWidth - 15,
         doc.internal.pageSize.height - 10,
         { align: 'right' }
       );
     }
     
-    // Guardar PDF
-    const filename = `Reporte_${selectedUnit}_${new Date().toISOString().split('T')[0]}.pdf`;
-    doc.save(filename);
+    // Abrir PDF en nueva ventana en lugar de descargar
+    const pdfBlob = doc.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    window.open(pdfUrl, '_blank');
   };
 
   return (
@@ -320,7 +422,7 @@ const Reports = () => {
         <div className="preview-header">
           <h3 className="preview-title">Previsualización del Reporte</h3>
           <button className="generate-btn" onClick={generatePDF}>
-            📄 Generar y Descargar PDF
+            📄 Generar y Abrir PDF
           </button>
         </div>
 
