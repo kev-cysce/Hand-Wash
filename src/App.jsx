@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Layout from './components/layout/Layout';
 import WashStation from './pages/WashStation';
 import Dashboard from './pages/Dashboard';
+import StepMetrics from './pages/StepMetrics';
 
 function App() {
   const [currentView, setCurrentView] = useState('wash-station');
@@ -9,7 +10,6 @@ function App() {
 
   useEffect(() => {
     const handleKeyPress = (event) => {
-      // Presionar 'M' o 'ESC' para mostrar/ocultar header
       if (event.key === 'm' || event.key === 'M' || event.key === 'Escape') {
         setShowHeader(prev => !prev);
       }
@@ -19,7 +19,6 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
 
-  // Cuando cambia la vista, decidir si mostrar header por defecto
   useEffect(() => {
     if (currentView !== 'wash-station') {
       setShowHeader(true);
@@ -34,6 +33,8 @@ function App() {
         return <WashStation />;
       case 'dashboard':
         return <Dashboard />;
+      case 'step-metrics':
+        return <StepMetrics />;
       case 'reports':
         return (
           <div style={{ 

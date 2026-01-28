@@ -4,6 +4,7 @@ const Header = ({ currentView, onViewChange, className }) => {
   const menuItems = [
     { id: 'wash-station', icon: '🖐️', label: 'Estación de Lavado' },
     { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+    { id: 'step-metrics', icon: '📋', label: 'Métricas por Paso' },
     { id: 'reports', icon: '📈', label: 'Reportes' },
     { id: 'users', icon: '👥', label: 'Usuarios' },
     { id: 'settings', icon: '⚙️', label: 'Configuración' }
@@ -13,7 +14,11 @@ const Header = ({ currentView, onViewChange, className }) => {
     <header className={`top-header ${className}`}>
       <div className="header-content">
         <div className="logo-section">
-          <img src="/Hand-Wash/images/Logo.jpeg" alt="CYSCE" className="header-logo" />
+          <img 
+            src={`${import.meta.env.BASE_URL}images/Logo.jpeg`} 
+            alt="CYSCE" 
+            className="header-logo" 
+          />
         </div>
 
         <nav className="top-nav">
