@@ -2,44 +2,37 @@ import { useState, useEffect } from 'react';
 import './WashStation.css';
 
 const WashStation = () => {
-  // Objetivos finales: solo pasos 1 y 3 completos, resto entre 30-40%
   const targetProgress = [100, 35, 100, 32, 38, 34];
   const [currentProgress, setCurrentProgress] = useState([0, 0, 0, 0, 0, 0]);
 
   const washSteps = [
-    { id: 1, name: 'Palma con palma', progress: currentProgress[0], image: `${import.meta.env.BASE_URL}images/pasos/Paso 1.png` },
-    { id: 2, name: 'Palma sobre dorsos', progress: currentProgress[1], image: `${import.meta.env.BASE_URL}images/pasos/Paso 2.png` },
-    { id: 3, name: 'Palma entrelazados', progress: currentProgress[2], image: `${import.meta.env.BASE_URL}images/pasos/Paso 3.png` },
-    { id: 4, name: 'Manos a dedos', progress: currentProgress[3], image: `${import.meta.env.BASE_URL}images/pasos/Paso 4.png` },
-    { id: 5, name: 'Rotación pulgar', progress: currentProgress[4], image: `${import.meta.env.BASE_URL}images/pasos/Paso 5.png` },
-    { id: 6, name: 'Yemas con palma', progress: currentProgress[5], image: `${import.meta.env.BASE_URL}images/pasos/Paso 6.png` }
+    { id: 1, name: 'Palma con palma', progress: currentProgress[0], image: '/Hand-Wash/images/pasos/Paso 1.png' },
+    { id: 2, name: 'Palma sobre dorsos', progress: currentProgress[1], image: '/Hand-Wash/images/pasos/Paso 2.png' },
+    { id: 3, name: 'Palma entrelazados', progress: currentProgress[2], image: '/Hand-Wash/images/pasos/Paso 3.png' },
+    { id: 4, name: 'Manos a dedos', progress: currentProgress[3], image: '/Hand-Wash/images/pasos/Paso 4.png' },
+    { id: 5, name: 'Rotación pulgar', progress: currentProgress[4], image: '/Hand-Wash/images/pasos/Paso 5.png' },
+    { id: 6, name: 'Yemas con palma', progress: currentProgress[5], image: '/Hand-Wash/images/pasos/Paso 6.png' }
   ];
 
   useEffect(() => {
-    const duration = 120000; // 2 minutos en milisegundos
-    const updateInterval = 150; // Actualizar cada 150ms
+    const duration = 120000;
+    const updateInterval = 150;
     const totalUpdates = duration / updateInterval;
 
     const intervals = targetProgress.map((target, index) => {
       let current = 0;
       let updateCount = 0;
-      const startDelay = Math.random() * 3000; // Delay aleatorio de inicio (0-3 segundos)
+      const startDelay = Math.random() * 3000;
       
       const timeout = setTimeout(() => {
         const interval = setInterval(() => {
           updateCount++;
-          
-          // Incremento base por actualización
           const baseIncrement = target / totalUpdates;
-          
-          // Variación aleatoria del incremento (entre 0.5x y 1.5x el incremento base)
-          // Esto hace que a veces avance más rápido, a veces más lento, pero SIEMPRE avanza
-          const randomMultiplier = 0.5 + Math.random(); // Entre 0.5 y 1.5
+          const randomMultiplier = 0.5 + Math.random();
           const increment = baseIncrement * randomMultiplier;
           
           current += increment;
           
-          // Limitar al objetivo
           if (current >= target || updateCount >= totalUpdates) {
             current = target;
             clearInterval(interval);
@@ -65,12 +58,13 @@ const WashStation = () => {
 
   return (
     <div className="wash-station-new">
-      {/* Logo en esquina superior izquierda - 40% más pequeño */}
-      <div className="logo-corner">
-        <img src={`${import.meta.env.BASE_URL}images/Logo.jpeg`} alt="CYSCE Logo" className="logo-image" />
+      {/* Logos en esquina superior izquierda */}
+      <div className="logos-corner">
+        <img src="/Hand-Wash/images/Logo.jpeg" alt="CYSCE Logo" className="logo-image" />
+        <img src="/Hand-Wash/images/LOGO HDS.jpg" alt="Hospital Logo" className="logo-image" />
       </div>
 
-      {/* Video en esquina superior derecha - 25% más grande */}
+      {/* Video en esquina superior derecha */}
       <div className="video-corner">
         <div className="video-mini">
           <video 
@@ -80,13 +74,12 @@ const WashStation = () => {
             muted
             playsInline
           >
-            <source src={`${import.meta.env.BASE_URL}videos/Video Lavado de manos.mp4`} type="video/mp4" />
+            <source src="/Hand-Wash/videos/Video Lavado de manos.mp4" type="video/mp4" />
             Tu navegador no soporta el elemento de video.
           </video>
         </div>
       </div>
 
-      {/* Layout de 6 círculos - Minimalista */}
       <div className="circular-layout">
         <div className="title-section">
           <p className="main-subtitle">Supervisión de Lavado - 6 Pasos</p>

@@ -8,12 +8,15 @@
   background-color: #ffffff;
 }
 
-/* Logo en esquina superior izquierda - 40% más pequeño (135px -> 81px) */
-.logo-corner {
+/* Logos en esquina superior izquierda - ambos del mismo tamaño */
+.logos-corner {
   position: fixed;
   top: 20px;
   left: 20px;
   z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .logo-image {
@@ -22,7 +25,7 @@
   object-fit: contain;
 }
 
-/* Video en esquina superior derecha - 25% más grande (240x135 -> 300x169) */
+/* Video en esquina superior derecha - 25% más grande */
 .video-corner {
   position: fixed;
   top: 20px;
@@ -219,6 +222,10 @@
     height: 60px;
   }
 
+  .logos-corner {
+    gap: 15px;
+  }
+
   .video-mini {
     width: 225px;
     height: 127px;
@@ -232,9 +239,10 @@
     padding: 20px;
   }
   
-  .logo-corner {
+  .logos-corner {
     top: 10px;
     left: 10px;
+    gap: 10px;
   }
 
   .logo-image {
