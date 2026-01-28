@@ -3,6 +3,7 @@ import Layout from './components/layout/Layout';
 import WashStation from './pages/WashStation';
 import Dashboard from './pages/Dashboard';
 import StepMetrics from './pages/StepMetrics';
+import Reports from './pages/Reports';
 
 function App() {
   const [currentView, setCurrentView] = useState('wash-station');
@@ -36,22 +37,7 @@ function App() {
       case 'step-metrics':
         return <StepMetrics />;
       case 'reports':
-        return (
-          <div style={{ 
-            padding: '100px 40px', 
-            textAlign: 'center', 
-            color: 'var(--text-secondary)',
-            minHeight: 'calc(100vh - 70px)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <h2 style={{ fontSize: '48px', marginBottom: '16px' }}>📈</h2>
-            <h3 style={{ fontSize: '24px', color: 'var(--text-primary)', marginBottom: '8px' }}>Módulo de Reportes</h3>
-            <p>En desarrollo...</p>
-          </div>
-        );
+        return <Reports />;
       case 'users':
         return (
           <div style={{ 
