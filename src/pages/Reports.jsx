@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react';
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import ReportViewer from '../components/ReportViewer';
 import './Reports.css';
 
-// Generar datos simulados por unidad
+// IMPORTANTE: Usar la misma tasa de éxito que en Dashboard (76.684%)
+const TASA_EXITO = 0.76684;
+
+// Generar datos simulados por unidad (CONGRUENTE con Dashboard)
 const generateUnitData = (unitName, startDate, endDate) => {
   const data = [];
   const start = startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 30));
@@ -15,8 +17,8 @@ const generateUnitData = (unitName, startDate, endDate) => {
     const date = new Date(end);
     date.setDate(date.getDate() - i);
     
-    const lavados = Math.floor(Math.random() * 80) + 180;
-    const correctos = Math.floor(lavados * 0.76684);
+    const lavados = Math.floor(Math.random() * 80) + 180; // 180-260 lavados
+    const correctos = Math.floor(lavados * TASA_EXITO); // Usar tasa exacta
     
     data.push({
       fecha: date.toISOString().split('T')[0],
@@ -30,14 +32,23 @@ const generateUnitData = (unitName, startDate, endDate) => {
   return data;
 };
 
+// Datos por paso (CONGRUENTE con StepMetrics)
+const stepMetrics = [
+  { id: 1, name: 'Palma con palma', cumplimiento: 95.2 },
+  { id: 2, name: 'Palma sobre dorsos', cumplimiento: 72.4 },
+  { id: 3, name: 'Palma entrelazados', cumplimiento: 88.1 },
+  { id: 4, name: 'Manos a dedos', cumplimiento: 65.3 },
+  { id: 5, name: 'Rotación pulgar', cumplimiento: 70.8 },
+  { id: 6, name: 'Yemas con palma', cumplimiento: 68.5 }
+];
+
 const Reports = () => {
   const [selectedUnit, setSelectedUnit] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [reportType, setReportType] = useState('general');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState(null);
   const [showViewer, setShowViewer] = useState(false);
+  const [reportData, setReportData] = useState(null);
 
   const units = [
     { id: 'all', name: 'Todas las Unidades', icon: '🏥' },
@@ -56,7 +67,7 @@ const Reports = () => {
   ];
 
   // Generar datos según filtros
-  const reportData = useMemo(() => {
+  const generatedData = useMemo(() => {
     const unitsToInclude = selectedUnit === 'all' 
       ? ['UCI', 'Urgencias', 'Quirófano', 'Pediatría', 'Internación']
       : [units.find(u => u.id === selectedUnit)?.name];
@@ -74,7 +85,7 @@ const Reports = () => {
     let totalLavados = 0;
     let totalCorrectos = 0;
     
-    reportData.forEach(({ data }) => {
+    generatedData.forEach(({ data }) => {
       data.forEach(day => {
         totalLavados += day.lavados;
         totalCorrectos += day.correctos;
@@ -84,324 +95,50 @@ const Reports = () => {
     return {
       totalLavados,
       totalCorrectos,
-      tasaExito: totalLavados > 0 ? ((totalCorrectos / totalLavados) * 100).toFixed(3) : 0,
-      unidades: reportData.length
+      tasaExito: totalLavados > 0 ? ((totalCorrectos / totalLavados) * 100).toFixed(3) : '76.684',
+      unidades: generatedData.length
     };
-  }, [reportData]);
+  }, [generatedData]);
 
-  // Generar datos por paso
-  const generateStepData = () => {
-    const steps = [
-      { id: 1, name: 'Palma con palma', cumplimiento: 95.2 },
-      { id: 2, name: 'Palma sobre dorsos', cumplimiento: 72.4 },
-      { id: 3, name: 'Palma entrelazados', cumplimiento: 88.1 },
-      { id: 4, name: 'Manos a dedos', cumplimiento: 65.3 },
-      { id: 5, name: 'Rotación pulgar', cumplimiento: 70.8 },
-      { id: 6, name: 'Yemas con palma', cumplimiento: 68.5 }
-    ];
-    return steps;
-  };
-
-  // Generar PDF
-  const generatePDF = () => {
-    setIsGenerating(true);
+  // Generar reporte
+  const generateReport = () => {
+    const selectedUnitName = units.find(u => u.id === selectedUnit)?.name;
+    const selectedReportType = reportTypes.find(r => r.id === reportType)?.name;
     
-    try {
-      const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.width;
-      
-      // Header con logos
-      doc.setFontSize(20);
-      doc.setTextColor(0, 191, 165);
-      doc.text('Hand-Wash - Sistema de Supervisión', pageWidth / 2, 20, { align: 'center' });
-      
-      doc.setFontSize(12);
-      doc.setTextColor(90, 108, 125);
-      doc.text('CYSCE - Hospital HDS', pageWidth / 2, 28, { align: 'center' });
-      
-      // Línea separadora
-      doc.setDrawColor(224, 228, 232);
-      doc.line(15, 32, pageWidth - 15, 32);
-      
-      // Título del reporte
-      doc.setFontSize(16);
-      doc.setTextColor(30, 58, 95);
-      const reportTitle = reportTypes.find(r => r.id === reportType)?.name || 'Reporte General';
-      doc.text(reportTitle, 15, 42);
-      
-      // Información del reporte
-      doc.setFontSize(10);
-      doc.setTextColor(90, 108, 125);
-      const today = new Date().toLocaleDateString('es-ES', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
-      doc.text(`Fecha de generación: ${today}`, 15, 50);
-      doc.text(`Unidad: ${units.find(u => u.id === selectedUnit)?.name}`, 15, 56);
-      
-      const periodStart = startDate || new Date(new Date().setDate(new Date().getDate() - 30)).toLocaleDateString('es-ES');
-      const periodEnd = endDate || new Date().toLocaleDateString('es-ES');
-      doc.text(`Período: ${periodStart} - ${periodEnd}`, 15, 62);
-      
-      // Resumen ejecutivo
-      doc.setFontSize(14);
-      doc.setTextColor(30, 58, 95);
-      doc.text('Resumen Ejecutivo', 15, 75);
-      
-      const summaryData = [
-        ['Métrica', 'Valor'],
-        ['Total de Lavados', stats.totalLavados.toLocaleString()],
-        ['Lavados Correctos', stats.totalCorrectos.toLocaleString()],
-        ['Tasa de Éxito', `${stats.tasaExito}%`],
-        ['Unidades Analizadas', stats.unidades.toString()],
-        ['Tiempo Promedio', '28 segundos']
-      ];
-      
-      doc.autoTable({
-        startY: 80,
-        head: [summaryData[0]],
-        body: summaryData.slice(1),
-        theme: 'grid',
-        headStyles: {
-          fillColor: [0, 191, 165],
-          textColor: [255, 255, 255],
-          fontStyle: 'bold'
-        },
-        styles: {
-          fontSize: 10,
-          cellPadding: 5
-        },
-        columnStyles: {
-          0: { fontStyle: 'bold', cellWidth: 80 },
-          1: { halign: 'right', cellWidth: 'auto' }
-        }
-      });
-      
-      let currentY = doc.lastAutoTable.finalY + 15;
-
-      // Agregar contenido específico según tipo de reporte
-      if (reportType === 'steps') {
-        doc.setFontSize(14);
-        doc.setTextColor(30, 58, 95);
-        doc.text('Análisis por Paso', 15, currentY);
-        
-        currentY += 7;
-        
-        const stepData = generateStepData();
-        const stepTableData = [
-          ['Paso', 'Técnica', 'Cumplimiento'],
-          ...stepData.map(step => [
-            step.id.toString(),
-            step.name,
-            `${step.cumplimiento}%`
-          ])
-        ];
-        
-        doc.autoTable({
-          startY: currentY,
-          head: [stepTableData[0]],
-          body: stepTableData.slice(1),
-          theme: 'striped',
-          headStyles: {
-            fillColor: [0, 191, 165],
-            textColor: [255, 255, 255],
-            fontStyle: 'bold'
-          },
-          styles: {
-            fontSize: 10,
-            cellPadding: 5
-          }
-        });
-        
-        currentY = doc.lastAutoTable.finalY + 10;
-      }
-      
-      if (reportType === 'comparative' && selectedUnit === 'all') {
-        doc.setFontSize(14);
-        doc.setTextColor(30, 58, 95);
-        doc.text('Comparación entre Unidades', 15, currentY);
-        
-        currentY += 7;
-        
-        const compData = [
-          ['Unidad', 'Total Lavados', 'Correctos', 'Tasa de Éxito'],
-          ...reportData.map(({ unit, data }) => {
-            const total = data.reduce((sum, day) => sum + day.lavados, 0);
-            const correctos = data.reduce((sum, day) => sum + day.correctos, 0);
-            const tasa = ((correctos / total) * 100).toFixed(1);
-            return [unit, total.toString(), correctos.toString(), `${tasa}%`];
-          })
-        ];
-        
-        doc.autoTable({
-          startY: currentY,
-          head: [compData[0]],
-          body: compData.slice(1),
-          theme: 'striped',
-          headStyles: {
-            fillColor: [0, 191, 165],
-            textColor: [255, 255, 255],
-            fontStyle: 'bold'
-          },
-          styles: {
-            fontSize: 10,
-            cellPadding: 5
-          }
-        });
-        
-        currentY = doc.lastAutoTable.finalY + 10;
-      }
-      
-      // Datos detallados por unidad
-      doc.addPage();
-      currentY = 20;
-      
-      doc.setFontSize(14);
-      doc.setTextColor(30, 58, 95);
-      doc.text('Datos Detallados por Unidad', 15, currentY);
-      
-      currentY += 7;
-      
-      reportData.forEach(({ unit, data }) => {
-        const unitTotal = data.reduce((sum, day) => sum + day.lavados, 0);
-        const unitCorrectos = data.reduce((sum, day) => sum + day.correctos, 0);
-        const unitTasa = ((unitCorrectos / unitTotal) * 100).toFixed(1);
-        
-        const recentData = data.slice(-10);
-        
-        const unitData = [
-          ['Fecha', 'Lavados', 'Correctos', 'Cumplimiento'],
-          ...recentData.map(day => [
-            day.fechaLabel,
-            day.lavados.toString(),
-            day.correctos.toString(),
-            `${day.cumplimiento}%`
-          ]),
-          ['TOTAL', unitTotal.toString(), unitCorrectos.toString(), `${unitTasa}%`]
-        ];
-        
-        doc.setFontSize(12);
-        doc.setTextColor(0, 191, 165);
-        doc.text(`Unidad: ${unit}`, 15, currentY);
-        currentY += 5;
-        
-        doc.autoTable({
-          startY: currentY,
-          head: [unitData[0]],
-          body: unitData.slice(1, -1),
-          foot: [unitData[unitData.length - 1]],
-          theme: 'striped',
-          headStyles: {
-            fillColor: [0, 191, 165],
-            textColor: [255, 255, 255],
-            fontStyle: 'bold',
-            fontSize: 9
-          },
-          footStyles: {
-            fillColor: [240, 240, 240],
-            textColor: [30, 58, 95],
-            fontStyle: 'bold'
-          },
-          styles: {
-            fontSize: 9,
-            cellPadding: 4
-          },
-          columnStyles: {
-            0: { cellWidth: 30 },
-            1: { halign: 'right', cellWidth: 30 },
-            2: { halign: 'right', cellWidth: 30 },
-            3: { halign: 'right', cellWidth: 35 }
-          }
-        });
-        
-        currentY = doc.lastAutoTable.finalY + 15;
-        
-        if (currentY > 250) {
-          doc.addPage();
-          currentY = 20;
-        }
-      });
-      
-      // Footer
-      const pageCount = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        doc.text(
-          `Página ${i} de ${pageCount}`,
-          pageWidth / 2,
-          doc.internal.pageSize.height - 10,
-          { align: 'center' }
-        );
-        doc.text(
-          'Hand-Wash © 2026 CYSCE - Hospital HDS',
-          pageWidth - 15,
-          doc.internal.pageSize.height - 10,
-          { align: 'right' }
-        );
-      }
-      
-      // Crear Blob del PDF para mostrar en iframe
-      const pdfBlob = doc.output('blob');
-      const url = URL.createObjectURL(pdfBlob);
-      setPdfUrl(url);
-      setShowViewer(true);
-      
-    } catch (error) {
-      console.error('Error al generar PDF:', error);
-      alert('Error al generar el PDF. Por favor intenta de nuevo.');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const closeViewer = () => {
-    setShowViewer(false);
-    if (pdfUrl) {
-      URL.revokeObjectURL(pdfUrl);
-      setPdfUrl(null);
-    }
-  };
-
-  const downloadPDF = () => {
-    if (pdfUrl) {
-      const link = document.createElement('a');
-      link.href = pdfUrl;
-      link.download = `Reporte_${selectedUnit}_${new Date().toISOString().split('T')[0]}.pdf`;
-      link.click();
-    }
+    const periodStart = startDate 
+      ? new Date(startDate).toLocaleDateString('es-ES')
+      : new Date(new Date().setDate(new Date().getDate() - 30)).toLocaleDateString('es-ES');
+    const periodEnd = endDate 
+      ? new Date(endDate).toLocaleDateString('es-ES')
+      : new Date().toLocaleDateString('es-ES');
+    
+    const report = {
+      unit: selectedUnitName,
+      reportType: selectedReportType,
+      stats: stats,
+      stepData: reportType === 'steps' ? stepMetrics : null,
+      detailedData: generatedData[0]?.data || [],
+      dateRange: `${periodStart} - ${periodEnd}`
+    };
+    
+    setReportData(report);
+    setShowViewer(true);
   };
 
   return (
     <div className="reports">
-      {/* Visor de PDF Modal */}
-      {showViewer && (
-        <div className="pdf-viewer-modal">
-          <div className="pdf-viewer-header">
-            <h3>Reporte Generado</h3>
-            <div className="pdf-viewer-actions">
-              <button className="pdf-action-btn download" onClick={downloadPDF}>
-                💾 Descargar
-              </button>
-              <button className="pdf-action-btn close" onClick={closeViewer}>
-                ✕ Cerrar
-              </button>
-            </div>
-          </div>
-          <iframe
-            src={pdfUrl}
-            className="pdf-viewer-iframe"
-            title="Visor de PDF"
-          />
-        </div>
+      {/* Visor de Reporte */}
+      {showViewer && reportData && (
+        <ReportViewer 
+          reportData={reportData}
+          onClose={() => setShowViewer(false)}
+        />
       )}
 
       <div className="reports-header">
         <div>
           <h1 className="reports-title">Generación de Reportes</h1>
-          <p className="reports-subtitle">Reportes personalizados por unidad con exportación PDF</p>
+          <p className="reports-subtitle">Reportes personalizados por unidad con vista previa</p>
         </div>
       </div>
 
@@ -469,10 +206,9 @@ const Reports = () => {
           <h3 className="preview-title">Previsualización del Reporte</h3>
           <button 
             className="generate-btn" 
-            onClick={generatePDF}
-            disabled={isGenerating}
+            onClick={generateReport}
           >
-            {isGenerating ? '⏳ Generando...' : '📄 Generar Reporte'}
+            📄 Generar Reporte
           </button>
         </div>
 
